@@ -1,0 +1,57 @@
+datasource db {
+  provider = "sqlite"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id Int @default(autoincrement()) @id
+  email String  @unique
+  password String
+  coupons Redemption[]
+  // SQLite doesn't support enums
+  role      String     @default("User")
+}
+
+model Event {
+  id String @id
+  coupons Coupon[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Document {
+  id Int @default(autoincrement()) @id
+  path String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  redemptionId Int
+  redemption Redemption @relation(fields: [redemptionId], references: [id])
+
+  submitterId  Int?
+  submitter    User?    @relation(fields: [submitterId], references: [id])
+}
+
+model Redemption {
+  id        Int     @default(autoincrement()) @id
+  // SQLite doesn't support JSON columns
+  Submission String?
+  createdAt DateTime @default(now())
+
+  document Document[]
+
+  couponId Int
+  coupon Coupon @relation(fields: [couponId], references: [id])
+}
+
+model Coupon {
+  id        Int     @default(autoincrement()) @id
+  createdAt DateTime @default(now())
+
+  redeemerId  Int?
+  redeemer    User?    @relation(fields: [redeemerId], references: [id])
+}
